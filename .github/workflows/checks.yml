@@ -1,0 +1,14 @@
+name: Generic Check Scripts
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Check Board Headers
+        run: |
+          ./tools/check_all_board_headers.sh
