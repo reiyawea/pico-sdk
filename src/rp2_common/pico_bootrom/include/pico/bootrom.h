@@ -1049,9 +1049,15 @@ int rom_add_flash_runtime_partition(uint32_t start_offset, uint32_t size, uint32
 /*! \brief  Pick A/B partition for a separate partition
  * \ingroup pico_bootrom
  *
- * This will perform extra checks to prevent disrupting a main image TBYB, and return errors
+ * This will call `rom_pick_ab_partition` with the current `flash_update_boot_window_base`, while performing extra checks to prevent disrupting a main image TBYB.
+ * It requires the same minimum workarea size as `rom_pick_ab_partition`.
  * 
- * Also checks that the chosen partition contained a valid image
+ * For example, if an `explicit_buy` is pending then calling `pick_ab_partition` would normally clear the saved `flash_erase_addr` so the required erase would not
+ * occur when `explicit_buy` is called - this function saves and restores that address to prevent this issue, and returns `BOOTROM_ERROR_NOT_PERMITTED` if the
+ * partition chosen by `pick_ab_partition` also requires a flash erase version downgrade (as you can't erase 2 partitions with one `explicit_buy` call).
+ * 
+ * It also checks that the chosen partition contained a valid image (eg a signed image when using secure boot), and returns `BOOTROM_ERROR_NOT_FOUND`
+ * if it does not.
  *
  * \param workarea_base base address of work area
  * \param workarea_size size of work area
