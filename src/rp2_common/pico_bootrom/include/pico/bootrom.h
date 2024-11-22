@@ -1046,16 +1046,17 @@ static inline int rom_get_last_boot_type(void) {
  */
 int rom_add_flash_runtime_partition(uint32_t start_offset, uint32_t size, uint32_t permissions);
 
-/*! \brief  Pick A/B partition with TBYB guards
+/*! \brief Pick A/B partition without disturbing any in progress update or TBYB boot
  * \ingroup pico_bootrom
  *
- * This will call `rom_pick_ab_partition` with the current `flash_update_boot_window_base`, while performing extra checks to prevent disrupting a main image TBYB.
- * It requires the same minimum workarea size as `rom_pick_ab_partition`.
+ * This will call `rom_pick_ab_partition` using the `flash_update_boot_window_base` from the current boot, while performing extra checks to prevent disrupting
+ * a main image TBYB boot. It requires the same minimum workarea size as `rom_pick_ab_partition`.
  * \see rom_pick_ab_partition()
  * 
- * For example, if an `explicit_buy` is pending then calling `pick_ab_partition` would normally clear the saved `flash_erase_addr` so the required erase would not
- * occur when `explicit_buy` is called - this function saves and restores that address to prevent this issue, and returns `BOOTROM_ERROR_NOT_PERMITTED` if the
- * partition chosen by `pick_ab_partition` also requires a flash erase version downgrade (as you can't erase 2 partitions with one `explicit_buy` call).
+ * For example, if an `explicit_buy` is pending then calling `pick_ab_partition` would normally clear the saved flash erase address for the version downgrade,
+ * so the required erase of the other partition would not occur when `explicit_buy` is called - this function saves and restores that address to prevent this
+ * issue, and returns `BOOTROM_ERROR_NOT_PERMITTED` if the partition chosen by `pick_ab_partition` also requires a flash erase version downgrade (as you can't
+ * erase 2 partitions with one `explicit_buy` call).
  * 
  * It also checks that the chosen partition contained a valid image (eg a signed image when using secure boot), and returns `BOOTROM_ERROR_NOT_FOUND`
  * if it does not.
